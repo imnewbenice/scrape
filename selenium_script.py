@@ -31,9 +31,11 @@ try:
     url = "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOCView"
     driver.get(url)
 
-    # Allow time for the page to load
-    print("Waiting for page to load...")
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "a")))
+    # Wait for JavaScript-rendered content to load (customize as needed)
+    print("Waiting for dynamic content to load...")
+    WebDriverWait(driver, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a"))  # Wait for all links
+    )
 
     # Handle infinite scrolling (if applicable)
     print("Scrolling through the page to load all links...")
@@ -46,18 +48,15 @@ try:
             break
         last_height = new_height
 
-    # Find all links on the page
-    print("Extracting links...")
-    links = driver.find_elements(By.TAG_NAME, "a")
-
-    # Extract and filter URLs
+    # Extract all dynamically rendered links
+    print("Extracting dynamically rendered links...")
+    links = driver.find_elements(By.CSS_SELECTOR, "a")
     urls = list(set([link.get_attribute("href") for link in links if link.get_attribute("href")]))
-    valid_urls = [url for url in urls if url.startswith("http")]
 
     # Save URLs to a JSON file
-    print(f"Found {len(valid_urls)} valid URLs. Saving to file...")
+    print(f"Found {len(urls)} URLs. Saving to file...")
     with open("scraped_urls.json", "w") as file:
-        json.dump(valid_urls, file, indent=4)
+        json.dump(urls, file, indent=4)
 
     print("URLs successfully scraped and saved to scraped_urls.json")
 
