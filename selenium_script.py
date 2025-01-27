@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import time
 
@@ -22,8 +24,8 @@ try:
     url = "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOCView"
     driver.get(url)
 
-    # Allow time for JavaScript to load
-    time.sleep(5)  # Adjust as needed for the page to render completely
+    # Allow time for JavaScript to load or wait explicitly for elements
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "a")))
 
     # Find all links on the page
     links = driver.find_elements(By.TAG_NAME, "a")
