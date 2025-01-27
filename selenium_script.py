@@ -2,8 +2,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import time
 import json
 
@@ -21,44 +19,42 @@ service = Service(CHROMEDRIVER_PATH)
 driver = webdriver.Chrome(service=service, options=options)
 
 try:
-    # Open the webpage
-    driver.get("https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOCView")
+    # Chapter URLs
+    chapter_urls = [
+        {"name": "Chapter 1 District Governance", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a1"},
+        {"name": "Chapter 2 Administration", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a2"},
+        {"name": "Chapter 3 Business Operations", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a3"},
+        {"name": "Chapter 4 Human Resources", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a4"},
+        {"name": "Chapter 5 Students", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a5"},
+        {"name": "Revision History", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=-2"},
+    ]
 
-    # Wait for the buttons to load
-    WebDriverWait(driver, 20).until(
-        EC.presence_of_all_elements_located((By.CLASS_NAME, "TOCButton"))
-    )
+    # Store scraped links
+    scraped_links = []
 
-    # Store scraped URLs
-    scraped_data = []
+    for chapter in chapter_urls:
+        try:
+            # Navigate to the chapter URL
+            driver.get(chapter["url"])
+            time.sleep(3)  # Wait for the page to load
 
-    # Find all TOC buttons
-    while True:
-        # Refetch the TOC buttons in each loop to avoid stale element references
-        buttons = driver.find_elements(By.CLASS_NAME, "TOCButton")
-        for button in buttons:
-            try:
-                # Click the button
-                button.click()
-                time.sleep(3)  # Wait for the content to load
+            # Extract all links with "doJump" or other JavaScript calls
+            links = driver.find_elements(By.TAG_NAME, "a")
+            for link in links:
+                href = link.get_attribute("href")
+                if href and "doJump" in href:
+                    scraped_links.append({"chapter": chapter["name"], "link_text": link.text.strip(), "href": href})
 
-                # Scrape URLs from the new page
-                links = driver.find_elements(By.TAG_NAME, "a")
-                scraped_data.extend([link.get_attribute("href") for link in links if link.get_attribute("href")])
+            print(f"Scraped links from {chapter['name']}")
 
-                # Go back to the main page and refetch buttons
-                driver.back()
-                time.sleep(2)
-            except Exception as e:
-                print(f"Error interacting with button: {e}")
+        except Exception as e:
+            print(f"Error scraping {chapter['name']}: {e}")
 
-        break  # End the loop after processing buttons
+    # Save results to a file
+    with open("chapter_links.json", "w") as file:
+        json.dump(scraped_links, file, indent=4)
 
-    # Save scraped data to a file
-    with open("scraped_urls.json", "w") as file:
-        json.dump(scraped_data, file, indent=4)
-
-    print(f"Scraped {len(scraped_data)} URLs successfully.")
+    print(f"Scraped {len(scraped_links)} links successfully.")
 
 except Exception as e:
     print(f"An error occurred: {e}")
