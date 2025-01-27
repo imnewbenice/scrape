@@ -1,0 +1,36 @@
+name: Run Selenium Script
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  selenium-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Selenium and Chrome
+        run: |
+          pip install selenium
+          wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo apt-get update && sudo apt-get install -y google-chrome-stable
+
+      - name: Run Selenium script
+        run: python selenium_script.py
+
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: scraped-urls
+          path: scraped_urls.txt
