@@ -1,22 +1,27 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
 import time
 import json
 
+# Specify paths to ChromeDriver and Chrome
+CHROMEDRIVER_PATH = "/usr/bin/chromedriver"
+CHROME_BINARY_PATH = "/usr/bin/google-chrome"
+
 # Set up headless Chrome options
 options = Options()
+options.binary_location = CHROME_BINARY_PATH
 options.add_argument('--headless')
 options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 
-# Path to the ChromeDriver (adjust for GitHub Actions environment)
-service = Service('/usr/local/bin/chromedriver')
+# Path to the ChromeDriver
+service = Service(CHROMEDRIVER_PATH)
 
 # Start the WebDriver
 driver = webdriver.Chrome(service=service, options=options)
