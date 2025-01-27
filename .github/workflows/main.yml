@@ -20,15 +20,23 @@ jobs:
 
       - name: Install Specific Chrome and ChromeDriver
         run: |
-          # Install a fixed version of Chrome
+          # Install necessary tools
           sudo apt-get update
           sudo apt-get install -y wget unzip
+            
+          # Install a specific version of Chrome
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
-          
-          # Install a matching version of ChromeDriver
+
+          # Extract Chrome version and install the matching ChromeDriver version
           CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+')
           CHROME_DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION%.*}")
+          if [ -z "$CHROME_DRIVER_VERSION" ]; then
+            echo "Error: Failed to retrieve ChromeDriver version." >&2
+            exit 1
+          fi
+
+          echo "Installing ChromeDriver version $CHROME_DRIVER_VERSION for Chrome $CHROME_VERSION..."
           wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
