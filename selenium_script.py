@@ -8,6 +8,8 @@ import json
 CHROMEDRIVER_PATH = "/usr/bin/chromedriver"
 CHROME_BINARY_PATH = "/usr/bin/google-chrome"
 
+BASE_URL = "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs="
+
 options = Options()
 options.binary_location = CHROME_BINARY_PATH
 options.add_argument('--headless')
@@ -38,12 +40,25 @@ try:
             driver.get(chapter["url"])
             time.sleep(3)  # Wait for the page to load
 
-            # Extract all links with "doJump" or other JavaScript calls
+            # Extract all links with "doJump" in their attributes
             links = driver.find_elements(By.TAG_NAME, "a")
             for link in links:
                 href = link.get_attribute("href")
+                text = link.text.strip()
+
                 if href and "doJump" in href:
-                    scraped_links.append({"chapter": chapter["name"], "link_text": link.text.strip(), "href": href})
+                    # Extract the `doJump` number
+                    dojump_number = href.split("(")[1].split(")")[0]
+
+                    # Construct the full URL
+                    full_url = f"{BASE_URL}{dojump_number}"
+
+                    # Save the result
+                    scraped_links.append({
+                        "chapter": chapter["name"],
+                        "link_text": text,
+                        "full_url": full_url
+                    })
 
             print(f"Scraped links from {chapter['name']}")
 
@@ -51,7 +66,7 @@ try:
             print(f"Error scraping {chapter['name']}: {e}")
 
     # Save results to a file
-    with open("chapter_links.json", "w") as file:
+    with open("chapter_links_with_full_url.json", "w") as file:
         json.dump(scraped_links, file, indent=4)
 
     print(f"Scraped {len(scraped_links)} links successfully.")
