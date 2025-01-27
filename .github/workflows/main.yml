@@ -38,5 +38,5 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v3
         with:
-          name: scraped-urls
-          path: scraped_urls.json
+          name: chapter-links
+          path: chapter_links.json  # Updated file name
