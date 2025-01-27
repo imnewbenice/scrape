@@ -32,7 +32,7 @@ jobs:
 
       - name: Run Selenium script
         env:
-          PATH: /usr/bin:$PATH  # Use preinstalled binaries in /usr/bin
+          PATH: /usr/bin:$PATH
         run: python selenium_script.py
 
       - name: Upload results
