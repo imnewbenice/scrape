@@ -18,16 +18,17 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install Chrome and ChromeDriver
+      - name: Install Specific Chrome and ChromeDriver
         run: |
+          # Install a fixed version of Chrome
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y wget unzip
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+          
+          # Install a matching version of ChromeDriver
           CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+')
           CHROME_DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION%.*}")
-          if [ -z "$CHROME_DRIVER_VERSION" ]; then
-            echo "Error: ChromeDriver version matching Chrome $CHROME_VERSION not found." >&2
-            exit 1
-          fi
           wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
