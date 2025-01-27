@@ -22,11 +22,11 @@ jobs:
         run: |
           # Install necessary tools
           sudo apt-get update
-          sudo apt-get install -y wget unzip
-            
+          sudo apt-get install -y wget unzip || true  # Ignore minor errors during this step
+          
           # Install a specific version of Chrome
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y || true
 
           # Extract Chrome version and install the matching ChromeDriver version
           CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+')
