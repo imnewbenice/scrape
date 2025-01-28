@@ -38,5 +38,5 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v3
         with:
-          name: chapter-links-with-full-url
-          path: chapter_links_with_full_url.json  # Updated file name
+          name: urls
+          path: urls.json  # Updated file name
