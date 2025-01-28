@@ -32,17 +32,24 @@ jobs:
 
       - name: Validate Input File
         run: |
-          if [ ! -f chapters.json ]; then
-            echo "Input file 'chapters.json' not found."
+          if [ ! -f "chapters.json" ]; then
+            echo "Input file 'chapters.json' not found. Please include it in the repository."
             exit 1
           fi
 
-      - name: Run Selenium script
+      - name: Run Selenium Script
         env:
           PATH: /usr/bin:$PATH
         run: python selenium_script.py
 
-      - name: Upload results
+      - name: Verify Scraped Results Directory
+        run: |
+          if [ ! -d "scraped_results" ]; then
+            echo "No 'scraped_results' directory found. Ensure the script ran successfully."
+            exit 1
+          fi
+
+      - name: Upload Results
         uses: actions/upload-artifact@v3
         with:
           name: scraped-results
