@@ -30,8 +30,12 @@ jobs:
           echo "ChromeDriver version:"
           chromedriver --version
 
-      - name: Add URLs Input File
-        run: echo 'Ensure urls.json is included in the repository or upload it dynamically.'
+      - name: Validate Input File
+        run: |
+          if [ ! -f chapters.json ]; then
+            echo "Input file 'chapters.json' not found."
+            exit 1
+          fi
 
       - name: Run Selenium script
         env:
@@ -41,5 +45,5 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v3
         with:
-          name: scraped-content
-          path: scraped_content.json  # Output file from the script
+          name: scraped-results
+          path: scraped_results/*.json
