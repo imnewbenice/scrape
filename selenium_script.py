@@ -28,7 +28,8 @@ try:
         {"name": "Chapter 3 Business Operations", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a3"},
         {"name": "Chapter 4 Human Resources", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a4"},
         {"name": "Chapter 5 Students", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a5"},
-          ]
+        {"name": "Revision History", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=-2"},
+    ]
 
     # Store scraped links
     scraped_links = []
@@ -54,6 +55,9 @@ try:
                     policy_title = policy_title_element.text.strip()
                     policy_type = policy_type_element.text.strip()
 
+                    # Remove the copyright symbol if present
+                    policy_number = policy_number.replace("©", "").strip()
+
                     name = f"{policy_number} {policy_title} {policy_type}"
 
                     # Save the result
@@ -73,7 +77,7 @@ try:
 
     # Save results to a file
     with open("urls.json", "w") as file:
-        json.dump(scraped_links, file, indent=4, ensure_ascii=False)
+        json.dump(scraped_links, file, indent=4)
 
     print(f"Scraped {len(scraped_links)} links successfully.")
 
