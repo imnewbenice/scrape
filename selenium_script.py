@@ -28,8 +28,7 @@ try:
         {"name": "Chapter 3 Business Operations", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a3"},
         {"name": "Chapter 4 Human Resources", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a4"},
         {"name": "Chapter 5 Students", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a5"},
-        {"name": "Revision History", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=-2"},
-    ]
+          ]
 
     # Store scraped links
     scraped_links = []
@@ -74,7 +73,7 @@ try:
 
     # Save results to a file
     with open("urls.json", "w") as file:
-        json.dump(scraped_links, file, indent=4)
+        json.dump(scraped_links, file, indent=4, ensure_ascii=False)
 
     print(f"Scraped {len(scraped_links)} links successfully.")
 
