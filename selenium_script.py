@@ -77,7 +77,7 @@ try:
 
     # Save results to a file
     with open("urls.json", "w") as file:
-        json.dump(scraped_links, file, indent=4)
+        json.dump(scraped_links, file, indent=4, ensure_ascii=False)
 
     print(f"Scraped {len(scraped_links)} links successfully.")
 
