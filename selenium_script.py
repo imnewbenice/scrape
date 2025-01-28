@@ -40,26 +40,32 @@ try:
             driver.get(chapter["url"])
             time.sleep(3)  # Wait for the page to load
 
-            # Extract all links with "doJump" in their attributes
-            links = driver.find_elements(By.TAG_NAME, "a")
-            for link in links:
-                href = link.get_attribute("href")
-                text = link.text.strip()
+            # Extract all rows in the table containing policies or procedures
+            rows = driver.find_elements(By.CSS_SELECTOR, "tr")
+            for row in rows:
+                try:
+                    policy_number_element = row.find_element(By.CSS_SELECTOR, "td.PolNum a")
+                    policy_title_element = row.find_element(By.CSS_SELECTOR, "td.PolTitle")
+                    policy_type_element = row.find_element(By.CSS_SELECTOR, "td.PolType")
 
-                if href and "doJump" in href:
-                    # Extract the `doJump` number
-                    dojump_number = href.split("(")[1].split(")")[0]
-
-                    # Construct the full URL
+                    dojump_number = policy_number_element.get_attribute("href").split("(")[1].split(")")[0]
                     full_url = f"{BASE_URL}{dojump_number}"
+
+                    policy_number = policy_number_element.text.strip()
+                    policy_title = policy_title_element.text.strip()
+                    policy_type = policy_type_element.text.strip()
+
+                    name = f"{policy_number} {policy_title} {policy_type}"
 
                     # Save the result
                     scraped_links.append({
                         "url": full_url,
-                        "name": text,
+                        "name": name,
                         "last_scraped": None,
                         "extract": "yes"
                     })
+                except Exception as row_error:
+                    print(f"Error processing row: {row_error}")
 
             print(f"Scraped links from {chapter['name']}")
 
