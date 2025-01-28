@@ -53,19 +53,23 @@ def scrape_url(url):
 # Function to process a chapter
 def process_chapter(chapter_name, urls):
     results = []
+    output_dir = "scraped_results"
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, f"{chapter_name}_hashed.json")
+
     for url in urls:
         print(f"Scraping URL: {url}")
         data = scrape_url(url)
         if data:
             results.append(data)
 
-    # Save results to a JSON file named after the chapter
-    output_dir = "scraped_results"
-    os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, f"{chapter_name}_hashed.json")
-    with open(output_file, 'w') as file:
-        json.dump(results, file, indent=4)
-    print(f"Chapter {chapter_name} scraping complete. Data saved to {output_file}.")
+    try:
+        # Save results to a JSON file named after the chapter
+        with open(output_file, 'w') as file:
+            json.dump(results, file, indent=4)
+        print(f"Chapter {chapter_name} scraping complete. Data saved to {output_file}.")
+    except Exception as e:
+        print(f"Error saving file {output_file}: {e}")
 
 # Load chapter URLs from JSON file
 input_file = "chapters.json"
