@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 import hashlib
 import json
 import time
+import os
 
 # Paths to ChromeDriver and Chrome binary
 CHROMEDRIVER_PATH = "/usr/bin/chromedriver"
@@ -59,13 +60,19 @@ def process_chapter(chapter_name, urls):
             results.append(data)
 
     # Save results to a JSON file named after the chapter
-    output_file = f"{chapter_name}_hashed.json"
+    output_dir = "scraped_results"
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, f"{chapter_name}_hashed.json")
     with open(output_file, 'w') as file:
         json.dump(results, file, indent=4)
     print(f"Chapter {chapter_name} scraping complete. Data saved to {output_file}.")
 
 # Load chapter URLs from JSON file
-with open('chapters.json', 'r') as file:
+input_file = "chapters.json"
+if not os.path.exists(input_file):
+    raise FileNotFoundError(f"The input file '{input_file}' does not exist.")
+
+with open(input_file, 'r') as file:
     chapters = json.load(file)
 
 # Process each chapter
