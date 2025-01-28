@@ -54,3 +54,11 @@ jobs:
         with:
           name: scraped-results
           path: scraped_results/*.json
+          
+      - name: Commit and Push Results to Repository
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add scraped_results/*.json
+          git commit -m "Add scraped results"
+          git push
