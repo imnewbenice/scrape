@@ -56,7 +56,9 @@ try:
                     # Save the result
                     scraped_links.append({
                         "url": full_url,
-                        "name": f"{chapter['name']} - {text}"
+                        "name": text,
+                        "last_scraped": None,
+                        "extract": "yes"
                     })
 
             print(f"Scraped links from {chapter['name']}")
