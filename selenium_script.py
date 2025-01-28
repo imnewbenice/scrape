@@ -2,14 +2,15 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-import time
+import hashlib
 import json
+import time
 
+# Paths to ChromeDriver and Chrome binary
 CHROMEDRIVER_PATH = "/usr/bin/chromedriver"
 CHROME_BINARY_PATH = "/usr/bin/google-chrome"
 
-BASE_URL = "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs="
-
+# Configure Selenium
 options = Options()
 options.binary_location = CHROME_BINARY_PATH
 options.add_argument('--headless')
@@ -20,67 +21,56 @@ options.add_argument('--disable-dev-shm-usage')
 service = Service(CHROMEDRIVER_PATH)
 driver = webdriver.Chrome(service=service, options=options)
 
-try:
-    # Chapter URLs
-    chapter_urls = [
-        {"name": "Chapter 1 District Governance", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a1"},
-        {"name": "Chapter 2 Administration", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a2"},
-        {"name": "Chapter 3 Business Operations", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a3"},
-        {"name": "Chapter 4 Human Resources", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a4"},
-        {"name": "Chapter 5 Students", "url": "https://www.boardpolicyonline.com/bl/?b=agua_fria#&&hs=TOC%3a5"}    ]
+# Function to calculate content hash
+def calculate_hash(content):
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
-    # Store scraped links
-    scraped_links = []
+# Function to scrape a single URL
+def scrape_url(url):
+    driver.get(url)
+    time.sleep(2)  # Allow time for the page to load
 
-    for chapter in chapter_urls:
-        try:
-            # Navigate to the chapter URL
-            driver.get(chapter["url"])
-            time.sleep(3)  # Wait for the page to load
+    try:
+        # Extract title (h1) and content (p)
+        title = driver.find_element(By.TAG_NAME, 'h1').text
+        paragraphs = driver.find_elements(By.TAG_NAME, 'p')
+        content = "\n".join([p.text for p in paragraphs if p.text.strip()])
 
-            # Extract all rows in the table containing policies or procedures
-            rows = driver.find_elements(By.CSS_SELECTOR, "tr")
-            for row in rows:
-                try:
-                    policy_number_element = row.find_element(By.CSS_SELECTOR, "td.PolNum a")
-                    policy_title_element = row.find_element(By.CSS_SELECTOR, "td.PolTitle")
-                    policy_type_element = row.find_element(By.CSS_SELECTOR, "td.PolType")
+        # Calculate hash of the content
+        content_hash = calculate_hash(content)
 
-                    dojump_number = policy_number_element.get_attribute("href").split("(")[1].split(")")[0]
-                    full_url = f"{BASE_URL}{dojump_number}"
+        return {
+            "url": url,
+            "title": title,
+            "content": content,
+            "hash": content_hash
+        }
+    except Exception as e:
+        print(f"Error scraping {url}: {e}")
+        return None
 
-                    policy_number = policy_number_element.text.strip()
-                    policy_title = policy_title_element.text.strip()
-                    policy_type = policy_type_element.text.strip()
+# Function to process a chapter
+def process_chapter(chapter_name, urls):
+    results = []
+    for url in urls:
+        print(f"Scraping URL: {url}")
+        data = scrape_url(url)
+        if data:
+            results.append(data)
 
-                    # Remove the copyright symbol if present
-                    policy_number = policy_number.replace("©", "").strip()
+    # Save results to a JSON file named after the chapter
+    output_file = f"{chapter_name}_hashed.json"
+    with open(output_file, 'w') as file:
+        json.dump(results, file, indent=4)
+    print(f"Chapter {chapter_name} scraping complete. Data saved to {output_file}.")
 
-                    name = f"{policy_number} {policy_title} {policy_type}"
+# Load chapter URLs from JSON file
+with open('chapters.json', 'r') as file:
+    chapters = json.load(file)
 
-                    # Save the result
-                    scraped_links.append({
-                        "url": full_url,
-                        "name": name,
-                        "last_scraped": None,
-                        "extract": "yes"
-                    })
-                except Exception as row_error:
-                    print(f"Error processing row: {row_error}")
+# Process each chapter
+for chapter_name, urls in chapters.items():
+    print(f"Processing {chapter_name} with {len(urls)} URLs...")
+    process_chapter(chapter_name, urls)
 
-            print(f"Scraped links from {chapter['name']}")
-
-        except Exception as e:
-            print(f"Error scraping {chapter['name']}: {e}")
-
-    # Save results to a file
-    with open("urls.json", "w") as file:
-        json.dump(scraped_links, file, indent=4, ensure_ascii=False)
-
-    print(f"Scraped {len(scraped_links)} links successfully.")
-
-except Exception as e:
-    print(f"An error occurred: {e}")
-
-finally:
-    driver.quit()
+driver.quit()
