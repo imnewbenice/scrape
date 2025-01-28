@@ -55,9 +55,8 @@ try:
 
                     # Save the result
                     scraped_links.append({
-                        "chapter": chapter["name"],
-                        "link_text": text,
-                        "full_url": full_url
+                        "url": full_url,
+                        "name": f"{chapter['name']} - {text}"
                     })
 
             print(f"Scraped links from {chapter['name']}")
@@ -66,7 +65,7 @@ try:
             print(f"Error scraping {chapter['name']}: {e}")
 
     # Save results to a file
-    with open("chapter_links_with_full_url.json", "w") as file:
+    with open("urls.json", "w") as file:
         json.dump(scraped_links, file, indent=4)
 
     print(f"Scraped {len(scraped_links)} links successfully.")
